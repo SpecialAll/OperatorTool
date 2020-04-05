@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bootcamp-agent
+  namespace: demo
+  labels:
+    k8s-app: bootcamp-agent
+spec:
+  selector:
+    matchLabels:
+      name: bootcamp-agent
+  template:
+    metadata:
+      labels:
+        name: bootcamp-agent
+    spec:
+      containers:
+        - name: bootcamp-agent
+          image: registry.sensetime.com/diamond/zhangxiaohu/bootcamp/agent:v0.1.0
+          imagePullPolicy: Always
+          #command: ["sleep","500000"]
+          args: ["--data-path", "/tmp/data/","-serverAddress","bootcamp-service.demo.svc","--serverPort","9000"]
+          volumeMounts:
+            - name: nameserver-info
+              mountPath: /tmp/data
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+      volumes:
+        - name: nameserver-info
+          hostPath:
+            path: /run/systemd/resolve
